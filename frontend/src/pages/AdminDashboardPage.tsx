@@ -785,7 +785,7 @@ export default function AdminDashboardPage() {
                     <span className="w-2 h-2 rounded-full bg-primary-400 mt-1.5 shrink-0" />
                     <div className="min-w-0">
                       <div className="text-slate-700 dark:text-slate-200 leading-snug">
-                        {log.action.replaceAll("_", " ").toLowerCase()}
+                        {log.action.replace(/_/g, " ").toLowerCase()}
                         {log.details ? <span className="text-slate-400"> — {log.details}</span> : null}
                       </div>
                       <div className="text-xs text-slate-400">{timeAgo(log.created_at)}</div>
