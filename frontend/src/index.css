@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: #f6f5fc;
+  color: #1e1b3a;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark body {
+  background-color: #0b0e1c;
+  color: #e2e4f3;
+}
+
+/* Native <select> dropdown lists don't inherit Tailwind's dark: classes
+   (the browser renders the popup list itself), so theme them explicitly. */
+select {
+  color-scheme: light;
+}
+select option {
+  background-color: #ffffff;
+  color: #1e1b3a;
+}
+html.dark select {
+  color-scheme: dark;
+}
+html.dark select option {
+  background-color: #141a2e;
+  color: #e2e4f3;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #d9d4f7;
+  border-radius: 999px;
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #2a2f45;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+@layer components {
+  .app-card {
+    @apply bg-white rounded-2xl shadow-card border border-primary-100/60 p-4 dark:bg-[#141a2e] dark:border-white/10 dark:shadow-none;
+  }
+  .btn-primary {
+    @apply bg-primary-600 text-white rounded-xl font-semibold hover:bg-primary-700 transition-colors shadow-soft disabled:opacity-50;
+  }
+  .icon-btn {
+    @apply relative w-10 h-10 flex items-center justify-center rounded-full bg-primary-50 text-primary-600 hover:bg-primary-100 transition-colors dark:bg-white/10 dark:text-slate-200 dark:hover:bg-white/20;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Login screen — dark navy hero with purple/blue glow + glass card       */
+/* ---------------------------------------------------------------------- */
+
+.login-shell {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 700px at 12% 8%, rgba(124, 92, 252, 0.35), transparent 60%),
+    radial-gradient(1000px 800px at 88% 100%, rgba(56, 189, 248, 0.24), transparent 55%),
+    linear-gradient(160deg, #0a0e27 0%, #0b0f2e 55%, #0a0e27 100%);
+}
+
+.login-card {
+  position: relative;
+  background: rgba(18, 23, 58, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 30px 80px -10px rgba(0, 0, 0, 0.45);
+}
+
+.login-feature-icon {
+  @apply w-11 h-11 rounded-full flex items-center justify-center shrink-0;
+  background: rgba(124, 92, 252, 0.18);
+  border: 1px solid rgba(124, 92, 252, 0.35);
+}
+
+.login-field {
+  @apply w-full bg-white/5 border border-white/15 text-white placeholder:text-slate-500 rounded-xl pl-11 pr-3.5 py-3 text-sm outline-none transition;
+}
+.login-field:focus {
+  border-color: rgba(124, 92, 252, 0.7);
+  box-shadow: 0 0 0 3px rgba(124, 92, 252, 0.18);
+}
+
+.login-submit {
+  background: linear-gradient(90deg, #7c5cfc 0%, #38bdf8 100%);
+  box-shadow: 0 12px 30px -8px rgba(76, 120, 255, 0.45);
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+.login-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px -8px rgba(76, 120, 255, 0.55);
+}
+.login-submit:active:not(:disabled) {
+  transform: translateY(0);
+}

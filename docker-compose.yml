@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: fraudshield
+      POSTGRES_PASSWORD: fraudshield
+      POSTGRES_DB: fraudshield
+    ports:
+      # Host port changed from 5432 -> 5433 to avoid "port is already
+      # allocated" errors when a local Postgres install (or another
+      # project) is already using 5432 on the host machine. The container
+      # still listens on 5432 internally, so DATABASE_URL below (which
+      # talks container-to-container) is unaffected. If you need to
+      # connect to this database from a host tool (psql, DBeaver, etc.),
+      # use localhost:5433 instead of 5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Lets `depends_on: condition: service_healthy` below actually wait
+    # until Postgres can accept connections, not just until the container
+    # has started (which can happen well before Postgres is ready,
+    # especially on the very first run when it has to initialize).
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraudshield"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      # ./backend/.env is written for running the backend LOCALLY (without
+      # Docker), where Postgres/Redis are on localhost. Inside this
+      # container "localhost" means the backend container itself, not the
+      # separate postgres/redis containers - they're only reachable at
+      # their docker-compose service names. These override whatever
+      # DATABASE_URL/REDIS_URL happen to be in .env so Docker always wires
+      # services together correctly, regardless of .env's contents.
+      DATABASE_URL: postgresql+psycopg2://fraudshield:fraudshield@postgres:5432/fraudshield
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./ml:/ml
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      # Vite's dev-server proxy runs inside THIS container, so "localhost"
+      # would point at itself, not the backend container - it must use the
+      # backend's docker-compose service name instead. See vite.config.ts.
+      VITE_API_PROXY_TARGET: http://backend:8000
+      VITE_WS_PROXY_TARGET: ws://backend:8000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      # Anonymous volume "reserving" /app/node_modules so the bind mount
+      # above (your host ./frontend folder, which has no node_modules
+      # unless you've run `npm install` locally) doesn't shadow the
+      # node_modules that were installed INSIDE the image during `docker
+      # build`. Without this, the container's /app/node_modules gets
+      # replaced by your (empty) host folder and `vite` is "not found".
+      - /app/node_modules
+
+volumes:
+  pgdata:
